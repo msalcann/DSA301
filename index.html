@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSA 301 Project 1 - Indexed Growth Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+            background-color: #f9f9f9;
+        }
+        .chart-container {
+            width: 80%;
+            max-width: 900px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chart-container">
+        <h2>Did Infrastructure Keep Pace With Population Growth? (1940 - 2020)</h2>
+        <canvas id="growthChart"></canvas>
+    </div>
+
+    <script>
+        // X Ekseni: Yıllar
+        const years = [1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020];
+
+        // Ham Veriler (Kendi bulduğumuz tablolardaki yaklaşık değerler)
+        const rawPopulation = [17.8, 20.9, 27.7, 35.6, 44.7, 56.4, 67.8, 73.7, 83.6]; // Milyon
+        const rawHospitals = [154, 201, 566, 743, 827, 857, 1183, 1439, 1534]; // Adet
+        const rawSchools = [103, 326, 530, 917, 1864, 2795, 3544, 5179, 6096]; // Adet
+
+        // Yüzdesel Büyüme Hesaplama Fonksiyonu: ((Şu Anki Değer - İlk Değer) / İlk Değer) * 100
+        function calculateGrowth(dataArray) {
+            const baseValue = dataArray[0];
+            return dataArray.map(value => (((value - baseValue) / baseValue) * 100).toFixed(1));
+        }
+
+        // Ham verileri 1940 bazlı (%0) yüzdesel büyümeye çeviriyoruz
+        const popGrowth = calculateGrowth(rawPopulation);
+        const hospGrowth = calculateGrowth(rawHospitals);
+        const schoolGrowth = calculateGrowth(rawSchools);
+
+        // Chart.js Çizim Ayarları
+        const ctx = document.getElementById('growthChart').getContext('2d');
+        const growthChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: years,
+                datasets: [
+                    {
+                        label: 'Population Growth (%)',
+                        data: popGrowth,
+                        borderColor: '#e74c3c', // Kırmızı (Çizimindeki gibi)
+                        backgroundColor: '#e74c3c',
+                        borderWidth: 3,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Hospitals Growth (%)',
+                        data: hospGrowth,
+                        borderColor: '#2ecc71', // Yeşil (Çizimindeki gibi)
+                        backgroundColor: '#2ecc71',
+                        borderWidth: 3,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Vocational Schools Growth (%)',
+                        data: schoolGrowth,
+                        borderColor: '#3498db', // Mavi (Çizimindeki gibi)
+                        backgroundColor: '#3498db',
+                        borderWidth: 3,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y + '%';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Percentage Growth vs 1940 (%)',
+                            font: { weight: 'bold' }
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Years',
+                            font: { weight: 'bold' }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
